@@ -24,10 +24,14 @@ TensorBase empty_strided_xpu(
 */
   // return {};
 
+#if 1
+  return {};
+#else
   constexpr c10::DispatchKeySet xpu_dks(c10::DispatchKey::XPU);
   auto* allocator = at::getCPUAllocator();
   return at::detail::empty_generic(
       size, allocator, xpu_dks, dtype, memory_format_opt);
+#endif
 }
 
 TensorBase empty_strided_xpu(
