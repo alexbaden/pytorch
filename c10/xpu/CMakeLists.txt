@@ -6,6 +6,7 @@ include(../../cmake/public/xpu.cmake)
 
 set(C10_XPU_SRCS
     XPUFunctions.cpp
+    XPUGuard.cpp
 )
 set(C10_XPU_HEADERS
     XPUDeviceProp.h
