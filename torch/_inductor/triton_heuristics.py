@@ -366,11 +366,6 @@ class CachingAutotuner(KernelInterface):
 
         scope["runner"] = get_first_attr(binary, "run", "c_wrapper")
         scope["function"] = get_first_attr(binary, "function", "cu_function")
-        scope["cta_args"] = (
-            (binary.num_ctas, *get_first_attr(binary, "cluster_dims", "clusterDims"))
-            if hasattr(binary, "num_ctas")
-            else ()
-        )
 
         exec(
             f"""
@@ -380,8 +375,10 @@ class CachingAutotuner(KernelInterface):
                 else:
                     grid_0, grid_1, grid_2 = grid
 
-                runner(grid_0, grid_1, grid_2, bin.metadata.num_warps,
-                            *cta_args, bin.metadata.shared,
+                metadata = bin.metadata
+
+                runner(grid_0, grid_1, grid_2, metadata.num_warps, 
+                            metadata.num_ctas, metadata.cluster_dims[0], metadata.cluster_dims[1], metadata.cluster_dims[2], metadata.shared,
                             stream, function, None, None, None,
                             {', '.join(call_args)})
                 return bin
