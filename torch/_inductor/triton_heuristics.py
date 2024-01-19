@@ -380,8 +380,8 @@ class CachingAutotuner(KernelInterface):
                 else:
                     grid_0, grid_1, grid_2 = grid
 
-                runner(grid_0, grid_1, grid_2, bin.num_warps,
-                            *cta_args, bin.shared,
+                runner(grid_0, grid_1, grid_2, bin.metadata.num_warps,
+                            *cta_args, bin.metadata.shared,
                             stream, function, None, None, None,
                             {', '.join(call_args)})
                 return bin
