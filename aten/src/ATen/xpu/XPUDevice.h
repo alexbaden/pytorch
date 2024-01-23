@@ -10,4 +10,9 @@ inline Device getDeviceFromPtr(void* ptr) {
   return {c10::DeviceType::XPU, static_cast<DeviceIndex>(device)};
 }
 
+void copy(
+    const at::TensorBase& self,
+    const at::TensorBase& dst,
+    bool non_blocking);
+
 } // namespace at::xpu

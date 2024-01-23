@@ -1763,6 +1763,7 @@
 - func: _copy_from(Tensor self, Tensor dst, bool non_blocking=False) -> Tensor
   dispatch:
     MPS: _copy_from_mps
+    XPU: _copy_from_xpu
   autogen: _copy_from.out
 
 # We need this to be able to properly copy from a CPU to an XLA tensor with different sizes.

@@ -12,6 +12,7 @@
 #endif
 
 #include <ATen/xpu/EmptyTensor.h>
+#include <ATen/xpu/XPUDevice.h>
 
 namespace at::native {
 
@@ -25,6 +26,14 @@ Tensor empty_strided_xpu(
   Tensor result = at::detail::empty_strided_xpu(
       size, stride, dtype_opt, layout_opt, device_opt, pin_memory_opt);
   return result;
+}
+
+Tensor _copy_from_xpu(
+    const at::Tensor& self,
+    const at::Tensor& dst,
+    bool non_blocking) {
+  at::xpu::copy(self, dst, non_blocking);
+  return dst;
 }
 
 } // namespace at::native
