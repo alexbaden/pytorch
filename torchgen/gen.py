@@ -303,6 +303,13 @@ def cpp_string(s: str) -> str:
     s = s.replace("\t", "\\t")
     return f'"{s}"'
 
+def fm_for_dispatch_key(dk: DispatchKey, cpu_fm: FileManager, cuda_fm: FileManager, xpu_fm: FileManager) -> FileManager:
+    if is_cuda_dispatch_key(dk):
+        return cuda_fm
+    elif dk is DispatchKey.XPU:
+        return xpu_fm
+    else:
+        return cpu_fm
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 #
@@ -1806,7 +1813,7 @@ def gen_aggregated_headers(
     )
 
     for dispatch_key in dispatch_keys:
-        fm = cuda_fm if is_cuda_dispatch_key(dispatch_key) else cpu_fm
+        fm = fm_for_dispatch_key(dispatch_key, cpu_fm, cuda_fm, xpu_fm)
         if dispatch_key in functions_keys:
             inl_headers = f"#include <ATen/{dispatch_key}Functions_inl.h>"
 
@@ -1847,6 +1854,7 @@ def gen_per_operator_headers(
     backend_indices: Dict[DispatchKey, BackendIndex],
     cpu_fm: FileManager,
     cuda_fm: FileManager,
+    xpu_fm: FileManager,
     ops_fm: FileManager,
     functions_keys: Set[DispatchKey],
     dispatch_keys: Sequence[DispatchKey],
@@ -1994,7 +2002,7 @@ def gen_per_operator_headers(
                 },
             )
 
-        fm = cuda_fm if is_cuda_dispatch_key(dispatch_key) else cpu_fm
+        fm = fm_for_dispatch_key(dispatch_key, cpu_fm, cuda_fm, xpu_fm)
         inl_headers = f"#include <ATen/{dispatch_key}Functions_inl.h>"
 
         fm.write_with_template(
@@ -2044,6 +2052,7 @@ def gen_headers(
     core_fm: FileManager,
     cpu_fm: FileManager,
     cuda_fm: FileManager,
+    xpu_fm: FileManager,
     ops_fm: FileManager,
     dispatch_keys: Sequence[DispatchKey],
     functions_keys: Set[DispatchKey],
@@ -2059,6 +2068,7 @@ def gen_headers(
             backend_indices=backend_indices,
             cpu_fm=cpu_fm,
             cuda_fm=cuda_fm,
+            xpu_fm=xpu_fm,
             ops_fm=ops_fm,
             dispatch_keys=dispatch_keys,
             functions_keys=functions_keys,
@@ -2074,6 +2084,7 @@ def gen_headers(
             backend_indices=backend_indices,
             cpu_fm=cpu_fm,
             cuda_fm=cuda_fm,
+            xpu_fm=xpu_fm,
             dispatch_keys=dispatch_keys,
             functions_keys=functions_keys,
             rocm=rocm,
@@ -2184,6 +2195,7 @@ def gen_source_files(
     cpu_fm: FileManager,
     cpu_vec_fm: FileManager,
     cuda_fm: FileManager,
+    xpu_fm: FileManager,
     dispatch_keys: Sequence[DispatchKey],
     functions_keys: Set[DispatchKey],
     rocm: bool,
@@ -2204,7 +2216,7 @@ def gen_source_files(
 #include <ATen/hip/HIPContext.h>"""
 
     for dispatch_key in dispatch_keys:
-        fm = cuda_fm if is_cuda_dispatch_key(dispatch_key) else cpu_fm
+        fm = fm_for_dispatch_key(dispatch_key, cpu_fm, cuda_fm, xpu_fm)
 
         if per_operator_headers:
 
@@ -2781,6 +2793,7 @@ def main() -> None:
     cpu_fm = make_file_manager(options=options)
     cpu_vec_fm = make_file_manager(options=options)
     cuda_fm = make_file_manager(options=options)
+    xpu_fm = make_file_manager(options=options)
     ops_fm = make_file_manager(options=options, install_dir=ops_install_dir)
 
     # Only a limited set of dispatch keys get CPUFunctions.h headers generated
@@ -2828,6 +2841,7 @@ def main() -> None:
             cpu_fm=cpu_fm,
             cpu_vec_fm=cpu_vec_fm,
             cuda_fm=cuda_fm,
+            xpu_fm=xpu_fm,
             dispatch_keys=dispatch_keys,
             functions_keys=functions_keys,
             rocm=options.rocm,
@@ -2848,6 +2862,7 @@ def main() -> None:
             core_fm=core_fm,
             cpu_fm=cpu_fm,
             cuda_fm=cuda_fm,
+            xpu_fm=xpu_fm,
             ops_fm=ops_fm,
             dispatch_keys=dispatch_keys,
             functions_keys=functions_keys,
@@ -2868,6 +2883,7 @@ def main() -> None:
             (cpu_vec_fm, "cpu_vec_"),
             (core_fm, "core_"),
             (cuda_fm, "cuda_"),
+            (xpu_fm, "xpu_"),
             (ops_fm, "ops_"),
         ]:
             varname = prefix + depfile_stem

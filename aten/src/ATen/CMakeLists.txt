@@ -327,7 +327,7 @@ endif()
 
 if(USE_XPU)
   list(APPEND ATen_XPU_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/xpu)
-  list(APPEND ATen_XPU_SRCS ${xpu_cpp} ${native_xpu})
+  list(APPEND ATen_XPU_SRCS ${xpu_cpp} ${native_xpu} ${xpu_generated_sources})
 endif()
 
 list(APPEND ATen_CPU_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/..)
@@ -618,7 +618,7 @@ foreach(HEADER  ${INSTALL_HEADERS})
 endforeach()
 
 # TODO: Install hip_generated_headers when we have it
-foreach(HEADER ${generated_headers} ${cuda_generated_headers})
+foreach(HEADER ${generated_headers} ${cuda_generated_headers} ${xpu_generated_headers})
   # NB: Assumed to be flat
   install(FILES ${HEADER} DESTINATION ${AT_INSTALL_INCLUDE_DIR}/ATen)
 endforeach()

@@ -287,9 +287,7 @@ def is_cuda_dispatch_key(dk: DispatchKey) -> bool:
         DispatchKey.SparseCsrCUDA,
         DispatchKey.NestedTensorCUDA,
         DispatchKey.AutogradCUDA,
-        DispatchKey.XPU, # separate CUDA/XPU FileManager and CPU FileManager
     }
-
 
 # Structured kernel generation is only supported for certain key types;
 # otherwise use old-style

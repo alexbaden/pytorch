@@ -27,13 +27,4 @@ Tensor empty_strided_xpu(
   return result;
 }
 
-TORCH_LIBRARY_IMPL(aten, XPU, m) {
-  /*m.impl(
-      TORCH_SELECTIVE_NAME("aten::empty.memory_format"),
-      TORCH_FN(at::native::empty_xpu));*/
-  m.impl(
-      TORCH_SELECTIVE_NAME("aten::empty_strided"),
-      TORCH_FN(at::native::empty_strided_xpu));
-}
-
 } // namespace at::native
