@@ -39,6 +39,7 @@ class TORCH_API Context {
     c10::DeviceType device_type = device.type();
     initCUDAIfNeeded(device_type);
     initHIPIfNeeded(device_type);
+    initXPUIfNeeded(device_type);
     if (device_type == at::kCPU) {
       return at::detail::getDefaultCPUGenerator();
     } else if (device_type == at::kCUDA) {

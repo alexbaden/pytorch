@@ -2,7 +2,7 @@
 
 #include <c10/core/Allocator.h>
 #include <c10/xpu/XPUMacros.h>
-// #include <c10/xpu/XPUStream.h>
+#include <c10/xpu/XPUStream.h>
 
 namespace c10::xpu {
 namespace XPUCachingAllocator {
@@ -17,7 +17,7 @@ C10_XPU_API void* raw_alloc(size_t size);
 
 C10_XPU_API void raw_delete(void* ptr);
 
-// C10_XPU_API void recordStream(const DataPtr& dataPtr, XPUStream stream);
+C10_XPU_API void recordStream(const DataPtr& dataPtr, XPUStream stream);
 
 } // namespace XPUCachingAllocator
 } // namespace c10::xpu

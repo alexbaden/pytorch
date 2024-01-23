@@ -3,6 +3,7 @@
 #include <ATen/EmptyTensor.h>
 #include <ATen/xpu/EmptyTensor.h>
 #include <c10/core/DeviceGuard.h>
+#include <c10/xpu/XPUCachingAllocator.h>
 
 namespace at::detail {
 
@@ -13,19 +14,13 @@ TensorBase empty_strided_xpu(
     c10::optional<Layout> layout_opt,
     c10::optional<Device> device_opt,
     c10::optional<bool> pin_memory_opt) {
-  // TODO: lazy init
+  at::globalContext().lazyInitXPU();
+
   const auto device = device_or_default(device_opt);
   TORCH_INTERNAL_ASSERT(device.is_xpu());
-  // const DeviceGuard device_guard(device);
-  /*
-  auto* allocator = at::cuda::getCUDADeviceAllocator();
-  constexpr c10::DispatchKeySet cuda_dks(c10::DispatchKey::CUDA);
-    memory_format_opt, cuda_dks, dtype, memory_format_opt);
-*/
-  // return {};
 
   constexpr c10::DispatchKeySet xpu_dks(c10::DispatchKey::XPU);
-  auto* allocator = at::getCPUAllocator();
+  auto* allocator = c10::xpu::XPUCachingAllocator::get();
   const auto dtype = dtype_or_default(dtype_opt);
   return at::detail::empty_strided_generic(
       size, stride, allocator, xpu_dks, dtype);
@@ -35,16 +30,12 @@ TensorBase empty_strided_xpu(
     IntArrayRef size,
     IntArrayRef stride,
     const TensorOptions& options) {
-  // TODO: lazy init
+  at::globalContext().lazyInitXPU();
+
   const auto device = device_or_default(options.device_opt());
   TORCH_INTERNAL_ASSERT(false);
   const DeviceGuard device_guard(device);
-  /*
-  auto* allocator = at::cuda::getCUDADeviceAllocator();
-  constexpr c10::DispatchKeySet cuda_dks(c10::DispatchKey::CUDA);
-  return at::detail::empty_generic(
-      size, allocator, cuda_dks, dtype, memory_format_opt);
-*/
+  TORCH_INTERNAL_ASSERT(false, "TODO");
   return {};
 }
 
@@ -53,16 +44,15 @@ TensorBase empty_xpu(
     ScalarType dtype,
     c10::optional<Device> device_opt,
     c10::optional<c10::MemoryFormat> memory_format_opt) {
-  // TODO: lazy init
+  at::globalContext().lazyInitXPU();
+
   const auto device = device_or_default(device_opt);
   TORCH_INTERNAL_ASSERT(device.is_xpu());
   const DeviceGuard device_guard(device);
-  // auto* allocator = at::cuda::getCUDADeviceAllocator();
-  // constexpr c10::DispatchKeySet cuda_dks(c10::DispatchKey::CUDA);
   constexpr c10::DispatchKeySet xpu_dks(c10 ::DispatchKey::XPU);
-  // TODO: need xpu allocator
+  auto* allocator = c10::xpu::XPUCachingAllocator::get();
   return at::detail::empty_generic(
-      size, nullptr, xpu_dks, dtype, memory_format_opt);
+      size, allocator, xpu_dks, dtype, memory_format_opt);
 }
 
 TensorBase empty_xpu(
