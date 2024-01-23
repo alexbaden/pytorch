@@ -2481,6 +2481,7 @@
     CUDA: empty_strided_cuda
     MPS: empty_strided_mps
     Meta: empty_strided_meta_symint
+    XPU: empty_strided_xpu
     QuantizedCPU, QuantizedCUDA: empty_strided_unknown_quantized
   autogen: empty_strided.out
   tags: core

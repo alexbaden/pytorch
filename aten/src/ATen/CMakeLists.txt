@@ -71,6 +71,7 @@ file(GLOB ops_h "ops/*.h")
 
 file(GLOB xpu_h "xpu/*.h" "xpu/detail/*.h")
 file(GLOB xpu_cpp "xpu/*.cpp" "xpu/detail/*.cpp")
+file(GLOB native_xpu "native/xpu/*.cpp")
 
 file(GLOB hip_h "hip/*.h" "hip/detail/*.h" "hip/*.cuh" "hip/detail/*.cuh" "hip/impl/*.h")
 file(GLOB hip_cpp "hip/*.cpp" "hip/detail/*.cpp" "hip/impl/*.cpp")
@@ -326,7 +327,7 @@ endif()
 
 if(USE_XPU)
   list(APPEND ATen_XPU_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/xpu)
-  list(APPEND ATen_XPU_SRCS ${xpu_cpp})
+  list(APPEND ATen_XPU_SRCS ${xpu_cpp} ${native_xpu})
 endif()
 
 list(APPEND ATen_CPU_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/..)
@@ -565,6 +566,8 @@ if(USE_CUDA)
   set(ATen_NVRTC_STUB_SRCS ${cuda_nvrtc_stub_cpp})
   list(APPEND ATen_CUDA_DEPENDENCY_LIBS ATEN_CUDA_FILES_GEN_LIB)
 endif()
+
+# Add XPU libs here?? 
 
 if(USE_MPS)
     set(ATen_MPS_SRCS ${ATen_MPS_SRCS} ${mps_cpp} ${mps_mm} ${mps_h} ${native_mps_cpp} ${native_mps_mm} ${native_mps_h})

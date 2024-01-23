@@ -56,6 +56,8 @@ def gen_registration_headers(
             headers.append("#include <ATen/hip/EmptyTensor.h>")
         else:
             headers.append("#include <ATen/cuda/EmptyTensor.h>")
+    elif backend_index.dispatch_key == DispatchKey.XPU:
+        headers.append("#include <ATen/xpu/EmptyTensor.h>")
     elif backend_index.dispatch_key == DispatchKey.MPS:
         headers.append("#include <ATen/mps/EmptyTensor.h>")
     elif per_operator_headers:
@@ -82,6 +84,7 @@ def gen_empty_impl_names(
         DispatchKey.CPU,
         DispatchKey.CUDA,
         DispatchKey.MPS,
+        DispatchKey.XPU,
     ):
         dispatch = str(backend_index.dispatch_key).lower()
         empty_impl = f"at::detail::empty_{dispatch}"
@@ -600,6 +603,7 @@ void set_output_{name}(
     def gen_class_set_output_body(self, k: SchemaKind, maybe_create_proxy: bool) -> str:
         if self.backend_index.dispatch_key in [
             DispatchKey.CUDA,
+            DispatchKey.XPU,
             DispatchKey.MPS,
             DispatchKey.CompositeExplicitAutogradNonFunctional,
         ]:
@@ -631,6 +635,7 @@ if (C10_UNLIKELY(maybe_proxy.has_value())) {
                 DispatchKey.Meta,
                 DispatchKey.CPU,
                 DispatchKey.CUDA,
+                DispatchKey.XPU,
                 DispatchKey.MPS,
                 DispatchKey.CompositeExplicitAutogradNonFunctional,
             )
@@ -698,7 +703,10 @@ resize_out(out, sizes, strides, options);
             if self.rocm:
                 guard_field = "c10::hip::OptionalHIPGuardMasqueradingAsCUDA guard_;"
             else:
-                guard_field = "c10::cuda::OptionalCUDAGuard guard_;"
+                guard_field = "c10::xpu::OptionalCUDAGuard guard_;"
+        elif self.backend_index.dispatch_key == DispatchKey.XPU:
+            # trying generic for now
+            guard_field = "c10::OptionalDeviceGuard guard_;"
         elif (
             self.backend_index.dispatch_key
             == DispatchKey.CompositeExplicitAutogradNonFunctional

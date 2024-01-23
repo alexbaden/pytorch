@@ -245,6 +245,7 @@ dispatch_keys = [
     DispatchKey.SparseCsrCPU,
     DispatchKey.MkldnnCPU,
     DispatchKey.CUDA,
+    DispatchKey.XPU,
     DispatchKey.MPS,
     DispatchKey.SparseCUDA,
     DispatchKey.SparseCsrCUDA,
@@ -286,6 +287,7 @@ def is_cuda_dispatch_key(dk: DispatchKey) -> bool:
         DispatchKey.SparseCsrCUDA,
         DispatchKey.NestedTensorCUDA,
         DispatchKey.AutogradCUDA,
+        DispatchKey.XPU, # separate CUDA/XPU FileManager and CPU FileManager
     }
 
 
