@@ -113,12 +113,14 @@ struct TORCH_API DispatchStubImpl {
     void* hip_dispatch_ptr;
     void* mps_dispatch_ptr;
     void* privateuse1_dispatch_ptr;
+    void* xpu_dispatch_ptr;
   #else
     std::atomic<void*> cpu_dispatch_ptr{nullptr};
     void* cuda_dispatch_ptr = nullptr;
     void* hip_dispatch_ptr = nullptr;
     void* mps_dispatch_ptr = nullptr;
     void* privateuse1_dispatch_ptr = nullptr;
+    void* xpu_dispatch_ptr = nullptr;
   #endif
 };
 
@@ -174,6 +176,10 @@ public:
     impl.privateuse1_dispatch_ptr = reinterpret_cast<void*>(fn_ptr);
   }
 
+  void set_xpu_dispatch_ptr(FnPtr fn_ptr) {
+    impl.xpu_dispatch_ptr = reinterpret_cast<void*>(fn_ptr);
+  }
+
   static TORCH_API FnPtr DEFAULT;
 #ifdef HAVE_AVX512_CPU_DEFINITION
   static TORCH_API FnPtr AVX512;
@@ -218,6 +224,13 @@ template <typename DispatchStub>
 struct RegisterPRIVATEUSE1Dispatch {
   RegisterPRIVATEUSE1Dispatch(DispatchStub &stub, typename DispatchStub::FnPtr value) {
     stub.set_privateuse1_dispatch_ptr(value);
+  }
+};
+
+template <typename DispatchStub>
+struct RegisterXPUDispatch {
+  RegisterXPUDispatch(DispatchStub &stub, typename DispatchStub::FnPtr value) {
+    stub.set_xpu_dispatch_ptr(value);
   }
 };
 
@@ -284,6 +297,9 @@ struct RegisterPRIVATEUSE1Dispatch {
 
 #define REGISTER_MPS_DISPATCH(name, fn) \
   static RegisterMPSDispatch<struct name> name ## __register(name, fn);
+
+#define REGISTER_XPU_DISPATCH(name, fn) \
+  static RegisterXPUDispatch<struct name> name ## __register(name, fn);
 
 #define REGISTER_PRIVATEUSE1_DISPATCH(name, fn) \
   static RegisterPRIVATEUSE1Dispatch<struct name> name ## __register(name, fn);

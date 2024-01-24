@@ -134,6 +134,10 @@ void* DispatchStubImpl::get_call_ptr(
       TORCH_INTERNAL_ASSERT(privateuse1_dispatch_ptr, "DispatchStub: missing PrivateUse1 kernel");
       return privateuse1_dispatch_ptr;
 
+    case DeviceType::XPU:
+      TORCH_INTERNAL_ASSERT(xpu_dispatch_ptr, "DispatchStub: missing XPU kernel");
+      return xpu_dispatch_ptr;
+
     default:
       AT_ERROR("DispatchStub: unsupported device type", device_type);
   }
