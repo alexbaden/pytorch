@@ -12,9 +12,11 @@
 
 
 namespace at::native {
-namespace {
 
 #if 0
+
+namespace {
+
 enum class OpType { GE, GT, LE, LT };
 
 template <typename scalar_t>
@@ -389,6 +391,8 @@ C10_NOINLINE void compare_kernel_with_scalars(
 }
 
 #endif 
+
+
 void ge_kernel_xpu(TensorIteratorBase& iter) {
     // TODO: fails silently 
 //   compare_kernel_with_scalars(iter, OpType::GE);
