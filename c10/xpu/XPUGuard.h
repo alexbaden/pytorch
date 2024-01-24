@@ -40,18 +40,12 @@ struct XPUGuard final : public c10::impl::DeviceGuardImplInterface {
     setDevice(d);
   }
   Stream getStream(Device d) const noexcept override {
-    // TODO
-    TORCH_INTERNAL_ASSERT(false);
     return Stream(Stream::DEFAULT, getDevice());
   }
   Stream getDefaultStream(Device d) const override {
-    // TODO
-    TORCH_INTERNAL_ASSERT(false);
     return Stream(Stream::DEFAULT, getDevice());
   }
   Stream exchangeStream(Stream s) const noexcept override {
-    // TODO
-    TORCH_INTERNAL_ASSERT(false);
     return Stream(Stream::DEFAULT, getDevice());
   }
   DeviceIndex deviceCount() const noexcept override {
