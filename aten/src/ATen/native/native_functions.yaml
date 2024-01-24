@@ -2362,6 +2362,7 @@
   dispatch:
     CPU: empty_cpu
     CUDA: empty_cuda
+    XPU: empty_xpu
     MPS: empty_mps
     Meta: empty_meta_symint
     MkldnnCPU: empty_mkldnn
@@ -7716,7 +7717,7 @@
   device_check: NoCheck
   device_guard: False
   dispatch:
-    CPU, CUDA, Meta, MPS: set_
+    CPU, CUDA, Meta, MPS, XPU: set_
   autogen: set.source_Storage, set.source_Storage_out
   tags: inplace_view
 
@@ -7728,6 +7729,7 @@
     CPU: set_storage_cpu_
     Meta: set_storage_meta__symint
     CUDA: set_storage_cuda_
+    XPU: set_storage_xpu_
     MPS: set_storage_mps_
     QuantizedCPU, QuantizedCUDA: set_storage_quantized_
   autogen: set.source_Storage_storage_offset, set.source_Storage_storage_offset_out

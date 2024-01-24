@@ -1,7 +1,17 @@
 #pragma once
 
 #include <ATen/Context.h>
+#include <ATen/core/TensorBase.h>
 #include <c10/xpu/XPUFunctions.h>
+
+#include <c10/util/OptionalArrayRef.h>
+
+namespace at {
+
+// TODO: remove duplication w/ ATen_fwd.h
+using OptionalIntArrayRef = c10::OptionalArrayRef<int64_t>;
+
+} // namespace at
 
 namespace at::xpu {
 
@@ -14,5 +24,11 @@ void copy(
     const at::TensorBase& self,
     const at::TensorBase& dst,
     bool non_blocking);
+
+at::TensorBase resize_impl_xpu_(
+    at::TensorBase& src,
+    IntArrayRef size,
+    at::OptionalIntArrayRef stride,
+    bool device_guard = true);
 
 } // namespace at::xpu

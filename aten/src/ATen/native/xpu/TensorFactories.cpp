@@ -11,6 +11,7 @@
 #include <ATen/ops/empty_strided_native.h>
 #endif
 
+#include <ATen/native/Resize.h>
 #include <ATen/xpu/EmptyTensor.h>
 #include <ATen/xpu/XPUDevice.h>
 
@@ -34,6 +35,43 @@ Tensor _copy_from_xpu(
     bool non_blocking) {
   at::xpu::copy(self, dst, non_blocking);
   return dst;
+}
+
+Tensor empty_xpu(
+    IntArrayRef size,
+    c10::optional<ScalarType> dtype_opt,
+    c10::optional<Layout> layout_opt,
+    c10::optional<Device> device_opt,
+    c10::optional<bool> pin_memory_opt,
+    c10::optional<c10::MemoryFormat> memory_format_opt) {
+  Tensor result = at::detail::empty_xpu(
+      size,
+      dtype_opt,
+      layout_opt,
+      device_opt,
+      pin_memory_opt,
+      memory_format_opt);
+  return result;
+}
+
+Tensor& set_storage_xpu_(
+    Tensor& result,
+    Storage storage,
+    int64_t storage_offset,
+    IntArrayRef size,
+    IntArrayRef stride) {
+  checkSetStorage(result, storage, storage_offset, size, stride);
+  result.unsafeGetTensorImpl()->set_storage_offset(storage_offset);
+  at::OptionalIntArrayRef stride_opt =
+      stride.data() != nullptr ? at::OptionalIntArrayRef(stride) : c10::nullopt;
+
+  if (result.sizes() == size &&
+      (!stride_opt || result.strides() == stride_opt)) {
+    return result;
+  }
+
+  at::xpu::resize_impl_xpu_(result, size, stride_opt);
+  return result;
 }
 
 } // namespace at::native
