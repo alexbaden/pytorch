@@ -1223,6 +1223,7 @@ class WrapperCodeGen(CodeGen):
 
         # Also include any possible kernel being called indirectly
         from triton import JITFunction
+        from triton.language import constexpr
 
         symbols_included = {original_name}
 
@@ -1249,7 +1250,15 @@ class WrapperCodeGen(CodeGen):
                         traverse(symbol)
                     elif isinstance(symbol, (int, str, bool)):
                         compile_wrapper.newline()
-                        compile_wrapper.writeline(f"{symbol_name} = {symbol!r}")
+                        compile_wrapper.writeline(
+                            f"{symbol_name} = tl.constexpr({symbol!r})"
+                        )
+                        symbols_included.add(symbol_name)
+                    elif isinstance(symbol, constexpr):
+                        compile_wrapper.newline()
+                        compile_wrapper.writeline(
+                            f"{symbol_name} = tl.constexpr({symbol.value!r})"
+                        )
                         symbols_included.add(symbol_name)
                     elif (
                         symbol_name in unqualified_loads
