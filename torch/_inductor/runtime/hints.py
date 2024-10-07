@@ -3,8 +3,10 @@ import typing
 from dataclasses import fields
 from enum import auto, Enum
 from typing import Dict, List, Optional, Union
+from functools import lru_cache
 
 from triton.compiler.compiler import AttrsDescriptor
+
 
 
 # NOTE: if these fail asserts submit a PR to increase them
@@ -27,34 +29,67 @@ class TileHint(Enum):
     SQUARE = 0
     DEFAULT = 1
 
+@lru_cache
+def _use_legacy_attrs_descriptor():
+    try:
+        from triton.backends.compiler import AttrsDescriptor
+        return False 
+    except ImportError:
+        return True 
 
-def instance_descriptor(
-    divisible_by_16=None,
-    equal_to_1=None,
-    ids_of_folded_args=None,
-    divisible_by_8=None,
-):
-    attr_desc_fields = {f.name for f in fields(AttrsDescriptor)}
+if _use_legacy_attrs_descriptor():
 
-    # Determine if 'ids_of_folded_args' is a valid field for AttrsDescriptor
-    ids_of_folded_args_available = "ids_of_folded_args" in attr_desc_fields
-    divisible_by_8_available = "divisible_by_8" in attr_desc_fields
+    def instance_descriptor(
+        divisible_by_16=None,
+        equal_to_1=None,
+        ids_of_folded_args=None,
+        divisible_by_8=None,
+    ):
+        attr_desc_fields = {f.name for f in fields(AttrsDescriptor)}
 
-    # Prepare the arguments for AttrsDescriptor
-    kwargs = {
-        "divisible_by_16": divisible_by_16,
-        "equal_to_1": equal_to_1,
-    }
+        # Determine if 'ids_of_folded_args' is a valid field for AttrsDescriptor
+        ids_of_folded_args_available = "ids_of_folded_args" in attr_desc_fields
+        divisible_by_8_available = "divisible_by_8" in attr_desc_fields
 
-    # Conditionally add 'ids_of_folded_args' if it's available in AttrsDescriptor
-    if ids_of_folded_args_available:
-        kwargs["ids_of_folded_args"] = ids_of_folded_args
-    if divisible_by_8_available:
-        kwargs["divisible_by_8"] = divisible_by_8
+        # Prepare the arguments for AttrsDescriptor
+        kwargs = {
+            "divisible_by_16": divisible_by_16,
+            "equal_to_1": equal_to_1,
+        }
 
-    # Instantiate AttrsDescriptor with the prepared arguments
-    return AttrsDescriptor(**kwargs)
+        # Conditionally add 'ids_of_folded_args' if it's available in AttrsDescriptor
+        if ids_of_folded_args_available:
+            kwargs["ids_of_folded_args"] = ids_of_folded_args
+        if divisible_by_8_available:
+            kwargs["divisible_by_8"] = divisible_by_8
 
+        # Instantiate AttrsDescriptor with the prepared arguments
+        return AttrsDescriptor(**kwargs)
+else:
+
+    def instance_descriptor(
+        divisible_by_16=None,
+        equal_to_1=None,
+        ids_of_folded_args=None,
+        divisible_by_8=None,
+    ):
+        attr_desc_fields = {f for f in attrs_descriptor.property_values.keys()}
+
+        # AttrsDescriptor refactoring expects the 'tt' prefix 
+        ids_of_folded_args_available = "tt.ids_of_folded_args" in attr_desc_fields 
+
+        # Prepare the arguments for AttrsDescriptor
+        kwargs = {
+            "tt.divisibility": divisible_by_16,
+            "tt.equal_to": equal_to_1,
+        }
+
+        # Conditionally add 'ids_of_folded_args' if it's available in AttrsDescriptor
+        if ids_of_folded_args_available:
+            kwargs["tt.ids_of_folded_args"] = ids_of_folded_args
+
+        # Instantiate AttrsDescriptor with the prepared arguments, then serialize to dictionary 
+        return AttrsDescriptor.from_dict(kwargs).to_dict()
 
 _NUM_THREADS_PER_WARP = 32
 
