@@ -73,6 +73,7 @@ else:
         ids_of_folded_args=None,
         divisible_by_8=None,
     ):
+        attrs_descriptor = AttrsDescriptor()
         attr_desc_fields = {f for f in attrs_descriptor.property_values.keys()}
 
         # AttrsDescriptor refactoring expects the 'tt' prefix 
